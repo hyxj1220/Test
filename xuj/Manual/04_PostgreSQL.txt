@@ -1,0 +1,207 @@
+
+■ PostgreSQL インストール
+======================================================================
+● インストール
+----------------------------------------------------------------------
+cd /usr/local/src/
+
+groupadd -g 26 postgres
+useradd -u 26 -g 26 -d /usr/local/pgsql/ postgres
+chmod 755 /usr/local/pgsql
+
+mkdir /usr/local/src/pgsql
+chmod 777 /usr/local/src/pgsql
+
+
+rpm -qa | grep readline
+----------------------------------------
+readline-5.1-3.el5
+readline-5.1-3.el5
+----------------------------------------
+
+yum -y install readline-devel
+
+rpm -qa | grep readline
+----------------------------------------
+readline-5.1-3.el5
+readline-devel-5.1-3.el5
+readline-5.1-3.el5
+readline-devel-5.1-3.el5
+----------------------------------------
+
+rpm -qa | grep zlib
+----------------------------------------
+zlib-1.2.3-3
+zlib-1.2.3-3
+zlib-devel-1.2.3-3
+----------------------------------------
+
+rpm -q --qf '%{ARCH}' zlib-devel
+----------------------------------------
+x86_64
+----------------------------------------
+
+※ OS が 64bit なので x86_64 であれば OK
+
+(uname -a でアーキテクチャの確認が可能)
+
+
+wget http://sv171.ai-ms.co.jp/yamada/postgresql-8.4.8.tar.gz
+
+su - postgres
+
+whoami
+----------------------------------------
+postgres
+----------------------------------------
+
+cd /usr/local/src/pgsql
+
+tar xvzf ../postgresql-8.4.8.tar.gz
+
+cd postgresql-8.4.8
+
+./configure
+----------------------------------------
+configure: creating ./config.status
+config.status: creating GNUmakefile
+config.status: creating src/Makefile.global
+config.status: creating src/include/pg_config.h
+config.status: creating src/interfaces/ecpg/include/ecpg_config.h
+config.status: linking ./src/backend/port/tas/dummy.s to src/backend/port/tas.s
+config.status: linking ./src/backend/port/dynloader/linux.c to src/backend/port/dynloader.c
+config.status: linking ./src/backend/port/sysv_sema.c to src/backend/port/pg_sema.c
+config.status: linking ./src/backend/port/sysv_shmem.c to src/backend/port/pg_shmem.c
+config.status: linking ./src/backend/port/dynloader/linux.h to src/include/dynloader.h
+config.status: linking ./src/include/port/linux.h to src/include/pg_config_os.h
+config.status: linking ./src/makefiles/Makefile.linux to src/Makefile.port
+----------------------------------------
+
+make all
+----------------------------------------
+All of PostgreSQL successfully made. Ready to install.
+----------------------------------------
+
+make check
+----------------------------------------
+=======================
+ All 120 tests passed.
+=======================
+----------------------------------------
+※ if result 'NG', retry 'make check'.
+
+make install
+----------------------------------------
+PostgreSQL installation complete.
+----------------------------------------
+----------------------------------------------------------------------
+
+● 基本設定
+----------------------------------------------------------------------
+cd
+
+echo "PGDATA=/usr/local/pgsql/data" >> /usr/local/pgsql/.bashrc
+echo "export PGDATA" >> /usr/local/pgsql/.bashrc
+
+cat /usr/local/pgsql/.bashrc
+----------------------------------------
+# User specific aliases and functions
+PGDATA=/usr/local/pgsql/data
+export PGDATA
+----------------------------------------
+
+source .bashrc
+
+/usr/local/pgsql/bin/initdb --no-locale
+----------------------------------------
+Success. You can now start the database server using:
+
+    /usr/local/pgsql/bin/postgres -D /usr/local/pgsql/data
+or
+    /usr/local/pgsql/bin/pg_ctl -D /usr/local/pgsql/data -l logfile start
+----------------------------------------
+
+/usr/local/pgsql/bin/pg_ctl -w start
+
+
+/usr/local/pgsql/data/pg_hba.conf
+----------------------------------------
+デフォルト
+----------------------------------------
+
+vi /usr/local/pgsql/data/postgresql.conf
+----------------------------------------
+#listen_addresses = 'localhost'         # what IP address(es) to listen on;
+
+listen_addresses = '*'
+
+# max_connections = 100                   # (change requires restart)
+max_connections = 800
+
+
+# shared_buffers = 32MB                   # min 128kB or max_connections*16kB
+shared_buffers = 128MB
+
+
+#temp_buffers = 8MB                     # min 800kB
+temp_buffers = 32MB
+----------------------------------------
+
+/usr/local/pgsql/bin/pg_ctl status
+----------------------------------------
+pg_ctl: server is running (PID: XXXXX)
+/usr/local/pgsql/bin/postgres
+----------------------------------------
+
+/usr/local/pgsql/bin/pg_ctl stop
+----------------------------------------
+waiting for server to shut down....LOG:  received smart shutdown request
+LOG:  autovacuum launcher shutting down
+LOG:  shutting down
+LOG:  database system is shut down
+ done
+server stopped
+----------------------------------------
+
+/usr/local/pgsql/bin/pg_ctl -w start
+----------------------------------------
+waiting for server to start....LOG:  could not create IPv6 socket: Address family not supported by protocol
+LOG:  database system was shut down at 2011-06-16 12:26:27 JST
+LOG:  autovacuum launcher started
+LOG:  database system is ready to accept connections
+ done
+server started
+----------------------------------------
+
+ps auxwwf
+----------------------------------------
+/usr/local/pgsql/bin/postgres
+ \_ postgres: writer process
+ \_ postgres: wal writer process
+ \_ postgres: autovacuum launcher process
+ \_ postgres: stats collector process
+----------------------------------------
+
+exit
+
+whoami
+----------------------------------------
+root
+----------------------------------------
+
+vi /etc/profile
+【Shift G】
+----------------------------------------
+
+# export PATH USER LOGNAME MAIL HOSTNAME HISTSIZE INPUTRC
+
+export USER LOGNAME MAIL HOSTNAME HISTSIZE INPUTRC
+
+PATH=$PATH:/usr/local/pgsql/bin
+export PATH
+----------------------------------------
+
+source /etc/profile
+----------------------------------------------------------------------
+======================================================================
+

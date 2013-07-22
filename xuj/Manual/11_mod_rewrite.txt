@@ -1,0 +1,25 @@
+
+■ インストール
+======================================================================
+
+/usr/local/apache2/bin/httpd -l
+----------------------------------------
+mod_so.c
+----------------------------------------
+
+cd /usr/local/src/httpd-2.2.19/modules/mappers/
+
+/usr/local/apache2/bin/apxs -i -a -c ./mod_rewrite.c
+----------------------------------------
+chmod 755 /usr/local/apache2/modules/mod_rewrite.so
+[activating module `rewrite' in /usr/local/apache2/conf/httpd.conf]
+----------------------------------------
+
+cat /usr/local/apache2/conf/httpd.conf | grep mod_rewrite
+----------------------------------------
+LoadModule rewrite_module     modules/mod_rewrite.so
+----------------------------------------
+
+/usr/local/apache2/bin/apachectl restart
+======================================================================
+

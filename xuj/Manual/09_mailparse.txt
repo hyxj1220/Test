@@ -1,0 +1,84 @@
+
+■ mailparse インストール
+======================================================================
+● PHP インストール直後
+----------------------------------------------------------------------
+pear list
+
+Installed packages, channel pear.php.net:
+========================================
+Package          Version State
+Archive_Tar      1.3.3   stable
+Console_Getopt   1.2.3   stable
+PEAR             1.9.0   stable
+Structures_Graph 1.0.2   stable
+XML_Util         1.2.1   stable
+----------------------------------------------------------------------
+
+● チャンネル情報更新
+----------------------------------------------------------------------
+pear channel-update pear.php.net
+pear channel-update pecl.php.net
+----------------------------------------------------------------------
+
+● PEAR インストール
+----------------------------------------------------------------------
+## MAIL
+
+pear install --alldeps Mail
+----------------------------------------
+依存関係で以下もインストール
+Net_SMTP
+Net_Socket
+Auth_SASL
+----------------------------------------
+
+## File_Archive
+
+pear install --alldeps File_Archive
+----------------------------------------
+依存関係で以下もインストール
+MIME_Type
+Mail_Mime
+Cache_Lite
+System_Command
+----------------------------------------
+
+pear install --alldeps XML_RPC2
+
+pear install --alldeps XML_Parser
+
+
+pear list
+----------------------------------------------------------------------
+Installed packages, channel pear.php.net:
+=========================================
+Package          Version State
+Archive_Tar      1.3.3   stable
+Auth_SASL        1.0.4   stable
+Cache_Lite       1.7.11  stable
+Console_Getopt   1.2.3   stable
+File_Archive     1.5.4   stable
+MIME_Type        1.2.1   stable
+Mail             1.2.0   stable
+Mail_Mime        1.8.1   stable
+Net_SMTP         1.6.0   stable
+Net_Socket       1.0.10  stable
+PEAR             1.9.0   stable
+Structures_Graph 1.0.2   stable
+System_Command   1.0.7   stable
+XML_Parser       1.3.4   stable
+XML_RPC2         1.0.8   stable
+XML_Util         1.2.1   stable
+----------------------------------------------------------------------
+
+pecl install mailparse
+
+vi /usr/local/lib/php.ini
+【/php_zip.dll】
+----------------------------------------------------------------------
+extension_dir="/usr/local/lib/php/extensions/no-debug-non-zts-20060613/"
+
+extension = mailparse.so
+----------------------------------------------------------------------
+======================================================================

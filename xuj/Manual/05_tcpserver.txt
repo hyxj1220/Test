@@ -1,0 +1,72 @@
+
+■ tcpserver インストール
+======================================================================
+
+rpm -qa | grep openssl
+----------------------------------------
+openssl-0.9.8e-12.el5_5.7
+openssl-0.9.8e-12.el5_5.7
+openssl-devel-0.9.8e-12.el5_5.7
+openssl-devel-0.9.8e-12.el5_5.7
+----------------------------------------
+
+cd /usr/local/src
+
+wget http://sv171.ai-ms.co.jp/yamada/ucspi-tcp-0.88.tar.gz
+
+wget http://sv171.ai-ms.co.jp/yamada/ucspi-tcp-ssl-20050405.patch.gz
+
+tar zxvf ucspi-tcp-0.88.tar.gz
+
+gzip -d ucspi-tcp-ssl-20050405.patch.gz
+
+cd ucspi-tcp-0.88
+
+patch -p0 < ../ucspi-tcp-ssl-20050405.patch
+----------------------------------------
+patching file FILES
+patching file Makefile
+patching file TARGETS
+patching file addcr.1
+patching file argv0.1
+patching file date@.1
+patching file delcr.1
+patching file error.h
+patching file finger@.1
+patching file fixcrio.1
+patching file hier.c
+patching file http@.1
+patching file mconnect.1
+patching file recordio.1
+patching file tcp-environ.5
+patching file tcpcat.1
+patching file tcpclient.1
+patching file tcprules.1
+patching file tcprules.c
+patching file tcprulescheck.1
+patching file tcprulescheck.c
+patching file tcpserver.1
+patching file tcpserver.c
+patching file who@.1
+----------------------------------------
+
+make
+----------------------------------------
+nroff -man addcr.1 > addcr.0
+nroff -man delcr.1 > delcr.0
+nroff -man argv0.1 > argv0.0
+nroff -man recordio.1 > recordio.0
+----------------------------------------
+
+make setup check
+----------------------------------------
+./install
+./instcheck
+----------------------------------------
+
+echo '192.168.0.:allow,RELAYCLIENT=""' > /etc/tcp.smtp
+echo '127.:allow,RELAYCLIENT=""' >> /etc/tcp.smtp
+echo '182.48.34.176:allow,RELAYCLIENT=""' >> /etc/tcp.smtp
+echo ':allow' >> /etc/tcp.smtp
+/usr/local/bin/tcprules /etc/tcp.smtp.cdb /etc/tcp.smtp.tmp < /etc/tcp.smtp
+======================================================================

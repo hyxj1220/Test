@@ -1,0 +1,107 @@
+
+■ Apache インストール
+======================================================================
+● インストール
+----------------------------------------------------------------------
+cd /usr/local/src/
+
+wget http://sv171.ai-ms.co.jp/yamada/httpd-2.2.19.tar.gz
+
+tar zxvf httpd-2.2.19.tar.gz
+cd httpd-2.2.19/
+
+./configure --prefix=/usr/local/apache2 --enable-modules=so --enable-ssl
+----------------------------------------
+config.status: creating build/pkg/pkginfo
+config.status: creating build/config_vars.sh
+config.status: creating include/ap_config_auto.h
+config.status: executing default commands
+----------------------------------------
+
+make
+----------------------------------------
+make[1]: Leaving directory `/usr/local/src/httpd-2.2.19'
+----------------------------------------
+
+make install
+----------------------------------------
+make[1]: Leaving directory `/usr/local/src/httpd-2.2.19'
+----------------------------------------
+
+/usr/local/apache2/bin/apachectl configtest
+----------------------------------------
+Syntax OK
+----------------------------------------
+
+/usr/local/apache2/bin/apachectl start
+
+/usr/sbin/groupadd -g 48 apache
+/usr/sbin/useradd -g apache -d /var/www -u 48 -s /sbin/nologin apache
+
+cat /etc/passwd | grep apache
+----------------------------------------
+apache:x:48:48::/var/www:/sbin/nologin
+----------------------------------------
+----------------------------------------------------------------------
+
+● 基本設定
+----------------------------------------------------------------------
+cp /usr/local/apache2/conf/httpd.conf /usr/local/apache2/conf/httpd.conf.orig
+
+vi /usr/local/apache2/conf/httpd.conf
+----------------------------------------
+#User daemon
+#Group daemon
+User apache
+Group apache
+
+# Virtual hosts
+#Include conf/extra/httpd-vhosts.conf
+
+Include conf/virtualhost.conf
+----------------------------------------
+
+vi /usr/local/apache2/conf/virtualhost.conf
+----------------------------------------
+NameVirtualHost *:80
+
+### for default ######################################################
+
+<VirtualHost *:80>
+    ServerAdmin info@svXXX.ai-ms.co.jp
+    DocumentRoot /home/hongrui/public_html
+    ServerName svXXX.ai-ms.co.jp
+</VirtualHost>
+----------------------------------------
+
+※ ホスト名は 00_admin.txt ファイルかメールを確認
+
+exit
+
+whoami
+----------------------------------------
+hongrui
+----------------------------------------
+
+mkdir /home/hongrui/public_html
+
+sudo su -
+
+/usr/local/apache2/bin/apachectl -t
+
+/usr/local/apache2/bin/apachectl -S
+
+/usr/local/apache2/bin/apachectl restart
+
+ps auxwwf
+----------------------------------------
+/usr/local/apache2/bin/httpd -k start
+ \_ /usr/local/apache2/bin/httpd -k start
+ \_ /usr/local/apache2/bin/httpd -k start
+ \_ /usr/local/apache2/bin/httpd -k start
+ \_ /usr/local/apache2/bin/httpd -k start
+ \_ /usr/local/apache2/bin/httpd -k start
+----------------------------------------
+----------------------------------------------------------------------
+======================================================================
+

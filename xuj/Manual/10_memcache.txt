@@ -1,0 +1,64 @@
+
+■ memcache インストール
+======================================================================
+● memcached インストール
+----------------------------------------------------------------------
+rpm -qa | grep libevent
+libevent-1.4.13-1
+
+cd /usr/local/src/
+
+wget http://sv171.ai-ms.co.jp/yamada/memcached-1.4.5-2.el5.remi.x86_64.rpm
+
+rpm -ivh memcached-1.4.5-2.el5.remi.x86_64.rpm
+
+vi /etc/sysconfig/memcached
+----------------------------------------
+PORT="11211"
+USER="apache"
+MAXCONN="1024"
+CACHESIZE="128"
+OPTIONS="-k"
+----------------------------------------
+
+which memcached
+----------------------------------------
+/usr/bin/memcached
+----------------------------------------
+
+/etc/rc.d/init.d/memcached start
+
+chkconfig memcached on
+
+chkconfig memcached --list
+----------------------------------------
+memcached       0:off   1:off   2:on    3:on    4:on    5:on    6:off
+----------------------------------------
+----------------------------------------------------------------------
+
+○ memcache インストール
+----------------------------------------------------------------------
+
+pecl install memcache
+----------------------------------------
+Enable memcache session handler support? [yes] :【Enter】
+----------------------------------------
+
+vi /usr/local/lib/php.ini
+【/mailparse】
+----------------------------------------
+extension_dir="/usr/local/lib/php/extensions/no-debug-non-zts-20060613/"
+
+extension = mailparse.so
+extension = memcache.so
+----------------------------------------
+
+pecl list
+----------------------------------------
+Installed packages, channel pecl.php.net:
+=========================================
+Package   Version State
+mailparse 2.1.5   stable
+memcache  2.2.6   stable
+----------------------------------------
+======================================================================

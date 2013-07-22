@@ -1,0 +1,616 @@
+----account_log_dat作成
+
+CREATE SEQUENCE account_log_dat_id_seq start 1 increment 1 maxvalue 2147483647 minvalue 1  cache 1 ;
+REVOKE ALL ON account_log_dat_id_seq FROM PUBLIC;
+GRANT ALL ON account_log_dat_id_seq TO PUBLIC;
+
+CREATE TABLE account_log_dat(
+	id int4 NOT NULL DEFAULT nextval('"account_log_dat_id_seq"'::text) PRIMARY KEY,
+	registration_date timestamp NOT NULL DEFAULT now(),
+	account_id int4 NOT NULL,
+	target text,
+	action text,
+	delete_flg boolean NOT NULL DEFAULT 'false'
+);
+REVOKE ALL ON account_log_dat FROM PUBLIC;
+GRANT ALL ON account_log_dat TO PUBLIC;
+
+CREATE INDEX account_log_dat_account_id_idx ON account_log_dat(account_id);
+
+----account_mst作成
+
+CREATE SEQUENCE account_mst_id_seq start 1 increment 1 maxvalue 2147483647 minvalue 1  cache 1 ;
+REVOKE ALL ON account_mst_id_seq FROM PUBLIC;
+GRANT ALL ON account_mst_id_seq TO PUBLIC;
+
+CREATE TABLE account_mst(
+	id int4 NOT NULL DEFAULT nextval('"account_mst_id_seq"'::text) PRIMARY KEY,
+	registration_date timestamp NOT NULL DEFAULT now(),
+	login text NOT NULL,
+	password text NOT NULL,
+	authority varchar(16) NOT NULL DEFAULT 'STAFF',
+	title text NOT NULL,
+	mail text,
+	company_name text,
+	phone text,
+	note text,
+	is_pro boolean NOT NULL DEFAULT 'false',
+	delete_flg boolean NOT NULL DEFAULT 'false'
+);
+REVOKE ALL ON account_mst FROM PUBLIC;
+GRANT ALL ON account_mst TO PUBLIC;
+
+CREATE INDEX account_mst_login_idx ON account_mst(login);
+CREATE INDEX account_mst_authority_idx ON account_mst(authority);
+
+----partner_reward_log_dat作成
+
+CREATE SEQUENCE partner_reward_log_dat_id_seq start 1 increment 1 maxvalue 2147483647 minvalue 1  cache 1 ;
+REVOKE ALL ON partner_reward_log_dat_id_seq FROM PUBLIC;
+GRANT ALL ON partner_reward_log_dat_id_seq TO PUBLIC;
+
+CREATE TABLE partner_reward_log_dat(
+	id int8 NOT NULL DEFAULT nextval('"partner_reward_log_dat_id_seq"'::text) PRIMARY KEY,
+	registration_date timestamp NOT NULL DEFAULT now(),
+	target_date timestamp NOT NULL DEFAULT now(),
+	action_name text NOT NULL,
+	adv_target text NOT NULL DEFAULT 'WEB',
+	media_id int4 NOT NULL DEFAULT '0',
+	client_id int4,
+	adv_id int4 NOT NULL,
+	course_id int4 NOT NULL,
+	reward int4 NOT NULL DEFAULT '0',
+	net_reward int4 NOT NULL DEFAULT '0',
+	price int4 NOT NULL DEFAULT '0',
+	serial_code varchar(256),
+	unique_code text,
+	delete_flg boolean NOT NULL DEFAULT 'false'
+);
+REVOKE ALL ON partner_reward_log_dat FROM PUBLIC;
+GRANT ALL ON partner_reward_log_dat TO PUBLIC;
+
+CREATE INDEX partner_reward_log_dat_registration_date_idx ON partner_reward_log_dat(registration_date);
+CREATE INDEX partner_reward_log_dat_action_name_idx ON partner_reward_log_dat(action_name);
+CREATE INDEX partner_reward_log_dat_media_id_idx ON partner_reward_log_dat(media_id);
+CREATE INDEX partner_reward_log_dat_client_id_idx ON partner_reward_log_dat(client_id);
+CREATE INDEX partner_reward_log_dat_adv_id_idx ON partner_reward_log_dat(adv_id);
+CREATE INDEX partner_reward_log_dat_target_date_idx ON partner_reward_log_dat(target_date);
+CREATE INDEX partner_reward_log_dat_serial_code_idx ON partner_reward_log_dat(serial_code);
+CREATE INDEX partner_reward_log_dat_unique_code_idx ON partner_reward_log_dat(unique_code);
+
+----keyword_mst作成
+
+CREATE SEQUENCE keyword_mst_id_seq start 1 increment 1 maxvalue 2147483647 minvalue 1  cache 1 ;
+REVOKE ALL ON keyword_mst_id_seq FROM PUBLIC;
+GRANT ALL ON keyword_mst_id_seq TO PUBLIC;
+
+CREATE TABLE keyword_mst(
+	id int4 NOT NULL DEFAULT nextval('"keyword_mst_id_seq"'::text) PRIMARY KEY,
+	registration_date timestamp NOT NULL DEFAULT now(),
+	name varchar(32) NOT NULL,
+	title text,
+	is_complex boolean NOT NULL DEFAULT 'false',
+	replace_text text,
+	delete_flg boolean NOT NULL DEFAULT 'false'
+);
+REVOKE ALL ON keyword_mst FROM PUBLIC;
+GRANT ALL ON keyword_mst TO PUBLIC;
+
+CREATE INDEX keyword_mst_name_idx ON keyword_mst(name);
+
+----user_mst作成
+
+CREATE SEQUENCE user_mst_id_seq start 1 increment 1 maxvalue 2147483647 minvalue 1  cache 1 ;
+REVOKE ALL ON user_mst_id_seq FROM PUBLIC;
+GRANT ALL ON user_mst_id_seq TO PUBLIC;
+
+CREATE TABLE user_mst(
+	id int8 NOT NULL DEFAULT nextval('"user_mst_id_seq"'::text) PRIMARY KEY,
+	registration_date timestamp NOT NULL DEFAULT now(),
+	entry_date timestamp NOT NULL,
+	last_entry_date timestamp NOT NULL,
+	login_date timestamp NOT NULL DEFAULT now(),
+	update_date timestamp NOT NULL,
+	stop_date timestamp,
+	withdrawn_date timestamp,
+	uuid varchar(64),
+	nickname varchar(64),
+	sp_mail text,
+	fp_mail text,
+	os varchar(64) NOT NULL,
+	carrier varchar(64) NOT NULL,
+	status varchar(32) NOT NULL,
+	attribute_name varchar(16),
+	device_token varchar(64),
+	is_push boolean NOT NULL DEFAULT 'false',
+	user_type varchar(32) NOT NULL DEFAULT 'USER',
+	tutorial_step varchar(32) NOT NULL DEFAULT 'STEP0',
+	invite_user_id int6,
+	delete_flg boolean NOT NULL DEFAULT 'false'
+);
+REVOKE ALL ON user_mst FROM PUBLIC;
+GRANT ALL ON user_mst TO PUBLIC;
+
+CREATE INDEX user_mst_uuid_idx ON user_mst(uuid);
+CREATE INDEX user_mst_guid_idx ON user_mst(guid);
+CREATE INDEX user_mst_sp_mail_idx ON user_mst(sp_mail);
+CREATE INDEX user_mst_fp_mail_idx ON user_mst(fp_mail);
+CREATE INDEX user_mst_nickname_idx ON user_mst(nickname);
+
+----user_point_dat作成
+
+CREATE SEQUENCE user_point_dat_id_seq start 1 increment 1 maxvalue 2147483647 minvalue 1  cache 1 ;
+REVOKE ALL ON user_point_dat_id_seq FROM PUBLIC;
+GRANT ALL ON user_point_dat_id_seq TO PUBLIC;
+
+CREATE TABLE user_point_dat(
+	id int8 NOT NULL DEFAULT nextval('"user_point_dat_id_seq"'::text) PRIMARY KEY,
+	registration_date timestamp NOT NULL DEFAULT now(),
+	user_id int8 NOT NULL,
+	point_type varchar(32) NOT NULL,
+	limit_date date,
+	category varchar(32) NOT NULL DEFAULT 'NORMAL',
+	point int4 NOT NULL DEFAULT '0',
+	original_point int4 NOT NULL DEFAULT '0',
+	delete_flg boolean NOT NULL DEFAULT 'false'
+);
+REVOKE ALL ON user_point_dat FROM PUBLIC;
+GRANT ALL ON user_point_dat TO PUBLIC;
+
+CREATE INDEX user_point_dat_user_id_idx ON user_point_dat(user_id);
+CREATE INDEX user_point_dat_limit_date_idx ON user_point_dat(limit_date);
+CREATE INDEX user_point_dat_point_type_idx ON user_point_dat(point_type);
+CREATE INDEX user_point_dat_category_idx ON user_point_dat(category);
+CREATE INDEX user_point_dat_original_point_idx ON user_point_dat(original_point);
+
+----user_search_criteria_dat作成
+
+CREATE SEQUENCE user_search_criteria_mst_id_seq start 1 increment 1 maxvalue 2147483647 minvalue 1  cache 1 ;
+REVOKE ALL ON user_search_criteria_mst_id_seq FROM PUBLIC;
+GRANT ALL ON user_search_criteria_mst_id_seq TO PUBLIC;
+
+CREATE TABLE user_search_criteria_dat(
+	id int4 NOT NULL DEFAULT nextval('"user_search_criteria_mst_id_seq"'::text) PRIMARY KEY,
+	registration_date timestamp NOT NULL DEFAULT now(),
+	title text NOT NULL,
+	criteria_data text,
+	delete_flg boolean NOT NULL DEFAULT 'false'
+);
+REVOKE ALL ON user_search_criteria_dat FROM PUBLIC;
+GRANT ALL ON user_search_criteria_dat TO PUBLIC;
+
+----maintenance_user_dat作成
+
+CREATE SEQUENCE maintenance_user_dat_id_seq start 1 increment 1 maxvalue 2147483647 minvalue 1  cache 1 ;
+REVOKE ALL ON maintenance_user_dat_id_seq FROM PUBLIC;
+GRANT ALL ON maintenance_user_dat_id_seq TO PUBLIC;
+
+CREATE TABLE maintenance_user_dat(
+	id int4 NOT NULL DEFAULT nextval('"maintenance_user_dat_id_seq"'::text) PRIMARY KEY,
+	registration_date timestamp NOT NULL DEFAULT now(),
+	cookie_value text,
+	fp_serial text,
+	delete_flg boolean NOT NULL DEFAULT 'false'
+);
+REVOKE ALL ON maintenance_user_dat FROM PUBLIC;
+GRANT ALL ON maintenance_user_dat TO PUBLIC;
+
+CREATE INDEX maintenance_user_dat_cookie_value_idx ON maintenance_user_dat(cookie_value);
+CREATE INDEX maintenance_user_dat_fp_serial_idx ON maintenance_user_dat(fp_serial);
+CREATE INDEX maintenance_user_dat_registration_date_idx ON maintenance_user_dat(registration_date);
+
+----directory_mst作成
+
+CREATE SEQUENCE directory_mst_id_seq start 1 increment 1 maxvalue 2147483647 minvalue 1  cache 1 ;
+REVOKE ALL ON directory_mst_id_seq FROM PUBLIC;
+GRANT ALL ON directory_mst_id_seq TO PUBLIC;
+
+CREATE TABLE directory_mst(
+	id int4 NOT NULL DEFAULT nextval('"directory_mst_id_seq"'::text) PRIMARY KEY,
+	registration_date timestamp NOT NULL DEFAULT now(),
+	name varchar(64) NOT NULL,
+	parent_name varchar(64),
+	view_name varchar(32) NOT NULL,
+	path varchar(64),
+	title text NOT NULL,
+	is_editable boolean NOT NULL DEFAULT 'true',
+	is_deletable boolean NOT NULL DEFAULT 'true',
+	is_childable boolean NOT NULL DEFAULT 'true',
+	is_pageable boolean NOT NULL DEFAULT 'true',
+	is_rewrite boolean NOT NULL DEFAULT 'true',
+	rewrite_rule text,
+	fullpath text NOT NULL,
+	delete_flg boolean NOT NULL DEFAULT 'false'
+);
+REVOKE ALL ON directory_mst FROM PUBLIC;
+GRANT ALL ON directory_mst TO PUBLIC;
+
+CREATE INDEX directory_mst_name_idx ON directory_mst(name);
+CREATE INDEX directory_mst_parent_name_idx ON directory_mst(parent_name);
+CREATE INDEX directory_mst_view_name_idx ON directory_mst(view_name);
+CREATE INDEX directory_mst_path_idx ON directory_mst(path);
+CREATE INDEX directory_mst_fullpath_idx ON directory_mst(fullpath);
+
+----page_mst作成
+
+CREATE SEQUENCE page_mst_id_seq start 1 increment 1 maxvalue 2147483647 minvalue 1  cache 1 ;
+REVOKE ALL ON page_mst_id_seq FROM PUBLIC;
+GRANT ALL ON page_mst_id_seq TO PUBLIC;
+
+CREATE TABLE page_mst(
+	id int4 NOT NULL DEFAULT nextval('"page_mst_id_seq"'::text) PRIMARY KEY,
+	registration_date timestamp NOT NULL DEFAULT now(),
+	name varchar(64) NOT NULL,
+	directory_name varchar(64) NOT NULL,
+	view_name varchar(32) NOT NULL,
+	path varchar(64) NOT NULL,
+	title text NOT NULL,
+	logic_name varchar(64) NOT NULL,
+	template_name varchar(64) NOT NULL,
+	is_editable boolean NOT NULL DEFAULT 'true',
+	is_deletable boolean NOT NULL DEFAULT 'true',
+	fullpath text NOT NULL,
+	delete_flg boolean NOT NULL DEFAULT 'false'
+);
+REVOKE ALL ON page_mst FROM PUBLIC;
+GRANT ALL ON page_mst TO PUBLIC;
+
+CREATE INDEX page_mst_name_idx ON page_mst(name);
+CREATE INDEX page_mst_view_name_idx ON page_mst(view_name);
+CREATE INDEX page_mst_directory_name_idx ON page_mst(directory_name);
+CREATE INDEX page_mst_path_idx ON page_mst(path);
+CREATE INDEX page_mst_fullpath_idx ON page_mst(fullpath);
+
+----page_dat作成
+
+CREATE SEQUENCE page_dat_id_seq start 1 increment 1 maxvalue 2147483647 minvalue 1  cache 1 ;
+REVOKE ALL ON page_dat_id_seq FROM PUBLIC;
+GRANT ALL ON page_dat_id_seq TO PUBLIC;
+
+CREATE TABLE page_dat(
+	id int4 NOT NULL DEFAULT nextval('"page_dat_id_seq"'::text) PRIMARY KEY,
+	registration_date timestamp NOT NULL DEFAULT now(),
+	page_name varchar(64) NOT NULL,
+	os varchar(64) NOT NULL DEFAULT 'COMMON',
+	carrier varchar(64) NOT NULL DEFAULT 'COMMON',
+	status varchar(64) NOT NULL DEFAULT 'WAITING',
+	content_type varchar(64) NOT NULL DEFAULT 'HTML',
+	encoding text NOT NULL DEFAULT 'UTF8',
+	is_pro boolean NOT NULL DEFAULT 'false',
+	master_data text,
+	account_id int4 NOT NULL,
+	delete_flg boolean NOT NULL DEFAULT 'false'
+);
+REVOKE ALL ON page_dat FROM PUBLIC;
+GRANT ALL ON page_dat TO PUBLIC;
+
+CREATE INDEX page_dat_page_name_idx ON page_dat(page_name);
+CREATE INDEX page_dat_os_idx ON page_dat(os);
+CREATE INDEX page_dat_carrier_idx ON page_dat(carrier);
+CREATE INDEX page_dat_status_idx ON page_dat(status);
+CREATE INDEX page_dat_account_id_idx ON page_dat(account_id);
+
+----page_part_dat作成
+
+CREATE SEQUENCE page_part_dat_id_seq start 1 increment 1 maxvalue 2147483647 minvalue 1  cache 1 ;
+REVOKE ALL ON page_part_dat_id_seq FROM PUBLIC;
+GRANT ALL ON page_part_dat_id_seq TO PUBLIC;
+
+CREATE TABLE page_part_dat(
+	id int4 NOT NULL DEFAULT nextval('"page_part_dat_id_seq"'::text) PRIMARY KEY,
+	registration_date timestamp NOT NULL DEFAULT now(),
+	page_dat_id int4 NOT NULL,
+	number int4 NOT NULL,
+	status varchar(64) NOT NULL DEFAULT 'WAITING',
+	is_editable boolean NOT NULL DEFAULT 'true',
+	is_wysiwyg boolean NOT NULL DEFAULT 'true',
+	wysiwyg_data text,
+	master_data text,
+	delete_flg boolean NOT NULL DEFAULT 'false'
+);
+REVOKE ALL ON page_part_dat FROM PUBLIC;
+GRANT ALL ON page_part_dat TO PUBLIC;
+
+CREATE INDEX page_part_dat_page_dat_id_idx ON page_part_dat(page_dat_id);
+CREATE INDEX page_part_dat_number_idx ON page_part_dat(number);
+CREATE INDEX page_part_dat_status_idx ON page_part_dat(status);
+
+----unsupported_page_mst作成
+
+CREATE SEQUENCE unsupported_page_mst_id_seq start 1 increment 1 maxvalue 2147483647 minvalue 1  cache 1 ;
+REVOKE ALL ON unsupported_page_mst_id_seq FROM PUBLIC;
+GRANT ALL ON unsupported_page_mst_id_seq TO PUBLIC;
+
+CREATE TABLE unsupported_page_mst(
+	id int4 NOT NULL DEFAULT nextval('"unsupported_page_mst_id_seq"'::text) PRIMARY KEY,
+	registration_date timestamp NOT NULL DEFAULT now(),
+	name varchar(64) NOT NULL,
+	title text NOT NULL,
+	logic_name varchar(64) NOT NULL,
+	delete_flg boolean NOT NULL DEFAULT 'false'
+);
+REVOKE ALL ON unsupported_page_mst FROM PUBLIC;
+GRANT ALL ON unsupported_page_mst TO PUBLIC;
+
+CREATE INDEX unsupported_page_mst_name_idx ON unsupported_page_mst(name);
+
+----unsupported_page_dat作成
+
+CREATE SEQUENCE unsupported_page_dat_id_seq start 1 increment 1 maxvalue 2147483647 minvalue 1  cache 1 ;
+REVOKE ALL ON unsupported_page_dat_id_seq FROM PUBLIC;
+GRANT ALL ON unsupported_page_dat_id_seq TO PUBLIC;
+
+CREATE TABLE unsupported_page_dat(
+	id int4 NOT NULL DEFAULT nextval('"unsupported_page_dat_id_seq"'::text) PRIMARY KEY,
+	registration_date timestamp NOT NULL DEFAULT now(),
+	page_name varchar(64) NOT NULL,
+	os varchar(64) NOT NULL DEFAULT 'COMMON',
+	carrier varchar(64) NOT NULL DEFAULT 'COMMON',
+	status varchar(64) NOT NULL DEFAULT 'WAITING',
+	master_data text,
+	account_id int4 NOT NULL,
+	delete_flg boolean NOT NULL DEFAULT 'false'
+);
+REVOKE ALL ON unsupported_page_dat FROM PUBLIC;
+GRANT ALL ON unsupported_page_dat TO PUBLIC;
+
+CREATE INDEX unsupported_page_dat_page_name_idx ON unsupported_page_dat(page_name);
+CREATE INDEX unsupported_page_dat_os_idx ON unsupported_page_dat(os);
+CREATE INDEX unsupported_page_dat_carrier_idx ON unsupported_page_dat(carrier);
+CREATE INDEX unsupported_page_dat_status_idx ON unsupported_page_dat(status);
+CREATE INDEX unsupported_page_dat_account_id_idx ON unsupported_page_dat(account_id);
+
+----template_page_mst作成
+
+CREATE SEQUENCE template_page_mst_id_seq start 1 increment 1 maxvalue 2147483647 minvalue 1  cache 1 ;
+REVOKE ALL ON template_page_mst_id_seq FROM PUBLIC;
+GRANT ALL ON template_page_mst_id_seq TO PUBLIC;
+
+CREATE TABLE template_page_mst(
+	id int4 NOT NULL DEFAULT nextval('"template_page_mst_id_seq"'::text) PRIMARY KEY,
+	registration_date timestamp NOT NULL DEFAULT now(),
+	name varchar(64) NOT NULL,
+	title text NOT NULL,
+	view_name varchar(32) NOT NULL,
+	logic_name varchar(64) NOT NULL,
+	content_type varchar(64) NOT NULL DEFAULT 'HTML',
+	encoding text NOT NULL DEFAULT 'UTF8',
+	is_pro boolean NOT NULL DEFAULT 'false',
+	master_data text,
+	account_id int4 NOT NULL,
+	delete_flg boolean NOT NULL DEFAULT 'false'
+);
+REVOKE ALL ON template_page_mst FROM PUBLIC;
+GRANT ALL ON template_page_mst TO PUBLIC;
+
+CREATE INDEX template_page_mst_name_idx ON template_page_mst(name);
+CREATE INDEX template_page_mst_view_name_idx ON template_page_mst(view_name);
+CREATE INDEX template_page_mst_account_id_idx ON template_page_mst(account_id);
+
+----template_page_part_dat作成
+
+CREATE SEQUENCE template_page_part_dat_id_seq start 1 increment 1 maxvalue 2147483647 minvalue 1  cache 1 ;
+REVOKE ALL ON template_page_part_dat_id_seq FROM PUBLIC;
+GRANT ALL ON template_page_part_dat_id_seq TO PUBLIC;
+
+CREATE TABLE template_page_part_dat(
+	id int4 NOT NULL DEFAULT nextval('"template_page_part_dat_id_seq"'::text) PRIMARY KEY,
+	registration_date timestamp NOT NULL DEFAULT now(),
+	template_name varchar(64) NOT NULL,
+	number int4 NOT NULL,
+	is_editable boolean NOT NULL DEFAULT 'true',
+	is_wysiwyg boolean NOT NULL DEFAULT 'true',
+	wysiwyg_data text,
+	master_data text,
+	delete_flg boolean NOT NULL DEFAULT 'false'
+);
+REVOKE ALL ON template_page_part_dat FROM PUBLIC;
+GRANT ALL ON template_page_part_dat TO PUBLIC;
+
+CREATE INDEX template_page_part_dat_template_name_idx ON template_page_part_dat(template_name);
+CREATE INDEX template_page_part_dat_number_idx ON template_page_part_dat(number);
+
+----external_page_mst作成
+
+CREATE SEQUENCE external_page_mst_id_seq start 1 increment 1 maxvalue 2147483647 minvalue 1  cache 1 ;
+REVOKE ALL ON external_page_mst_id_seq FROM PUBLIC;
+GRANT ALL ON external_page_mst_id_seq TO PUBLIC;
+
+CREATE TABLE external_page_mst(
+	id int4 NOT NULL DEFAULT nextval('"external_page_mst_id_seq"'::text) PRIMARY KEY,
+	registration_date timestamp NOT NULL DEFAULT now(),
+	name varchar(64) NOT NULL,
+	view_name varchar(32) NOT NULL,
+	content_type varchar(32) NOT NULL,
+	title text NOT NULL,
+	logic_name varchar(64) NOT NULL,
+	is_editable boolean NOT NULL DEFAULT 'true',
+	is_deletable boolean NOT NULL DEFAULT 'true',
+	delete_flg boolean NOT NULL DEFAULT 'false'
+);
+REVOKE ALL ON external_page_mst FROM PUBLIC;
+GRANT ALL ON external_page_mst TO PUBLIC;
+
+CREATE INDEX external_page_mst_name_idx ON external_page_mst(name);
+CREATE INDEX external_page_mst_view_name_idx ON external_page_mst(view_name);
+CREATE INDEX external_page_mst_content_type_idx ON external_page_mst(content_type);
+
+----external_page_dat作成
+
+CREATE SEQUENCE external_page_dat_id_seq start 1 increment 1 maxvalue 2147483647 minvalue 1  cache 1 ;
+REVOKE ALL ON external_page_dat_id_seq FROM PUBLIC;
+GRANT ALL ON external_page_dat_id_seq TO PUBLIC;
+
+CREATE TABLE external_page_dat(
+	id int4 NOT NULL DEFAULT nextval('"external_page_dat_id_seq"'::text) PRIMARY KEY,
+	registration_date timestamp NOT NULL DEFAULT now(),
+	external_page_name varchar(64) NOT NULL,
+	os varchar(64) NOT NULL DEFAULT 'COMMON',
+	carrier varchar(64) NOT NULL DEFAULT 'COMMON',
+	status varchar(64) NOT NULL DEFAULT 'WAITING',
+	content_type varchar(64) NOT NULL DEFAULT 'CSS',
+	encoding text NOT NULL DEFAULT 'UTF8',
+	master_data text,
+	account_id int4 NOT NULL,
+	delete_flg boolean NOT NULL DEFAULT 'false'
+);
+REVOKE ALL ON external_page_dat FROM PUBLIC;
+GRANT ALL ON external_page_dat TO PUBLIC;
+
+CREATE INDEX external_page_dat_page_name_idx ON external_page_dat(page_name);
+CREATE INDEX external_page_dat_os_idx ON external_page_dat(os);
+CREATE INDEX external_page_dat_carrier_idx ON external_page_dat(carrier);
+CREATE INDEX external_page_dat_status_idx ON external_page_dat(status);
+CREATE INDEX external_page_dat_account_id_idx ON external_page_dat(account_id);
+
+----image_group_mst作成
+
+CREATE SEQUENCE image_group_mst_id_seq start 1 increment 1 maxvalue 2147483647 minvalue 1  cache 1 ;
+REVOKE ALL ON image_group_mst_id_seq FROM PUBLIC;
+GRANT ALL ON image_group_mst_id_seq TO PUBLIC;
+
+CREATE TABLE image_group_mst(
+	id int4 NOT NULL DEFAULT nextval('"image_group_mst_id_seq"'::text) PRIMARY KEY,
+	registration_date timestamp NOT NULL DEFAULT now(),
+	name varchar(32) NOT NULL,
+	title text NOT NULL,
+	is_default boolean NOT NULL DEFAULT 'false',
+	comment text,
+	delete_flg boolean NOT NULL DEFAULT 'false'
+);
+REVOKE ALL ON image_group_mst FROM PUBLIC;
+GRANT ALL ON image_group_mst TO PUBLIC;
+
+CREATE INDEX image_group_mst_name_idx ON image_group_mst(name);
+
+----image_mst作成
+
+CREATE SEQUENCE image_mst_id_seq start 1 increment 1 maxvalue 2147483647 minvalue 1  cache 1 ;
+REVOKE ALL ON image_mst_id_seq FROM PUBLIC;
+GRANT ALL ON image_mst_id_seq TO PUBLIC;
+
+CREATE TABLE image_mst(
+	id int4 NOT NULL DEFAULT nextval('"image_mst_id_seq"'::text) PRIMARY KEY,
+	registration_date timestamp NOT NULL DEFAULT now(),
+	name varchar(64) NOT NULL,
+	group_name varchar(32) NOT NULL,
+	view_name varchar(32) NOT NULL,
+	title text NOT NULL,
+	alt text,
+	comment text,
+	account_id int4 NOT NULL,
+	delete_flg boolean NOT NULL DEFAULT 'false'
+);
+REVOKE ALL ON image_mst FROM PUBLIC;
+GRANT ALL ON image_mst TO PUBLIC;
+
+CREATE INDEX image_mst_name_idx ON image_mst(name);
+CREATE INDEX image_mst_group_name_idx ON image_mst(group_name);
+
+----image_dat作成
+
+CREATE SEQUENCE image_dat_id_seq start 1 increment 1 maxvalue 2147483647 minvalue 1  cache 1 ;
+REVOKE ALL ON image_dat_id_seq FROM PUBLIC;
+GRANT ALL ON image_dat_id_seq TO PUBLIC;
+
+CREATE TABLE image_dat(
+	id int4 NOT NULL DEFAULT nextval('"image_dat_id_seq"'::text) PRIMARY KEY,
+	registration_date timestamp NOT NULL DEFAULT now(),
+	image_id int4 NOT NULL,
+	image_size varchar(16) NOT NULL DEFAULT 'ORIGINAL',
+	content_type varchar(64) NOT NULL,
+	original_name text NOT NULL,
+	original_width int4,
+	original_height int4,
+	width int4,
+	height int4,
+	file_name text,
+	file_size int4,
+	delete_flg boolean NOT NULL DEFAULT 'false'
+);
+REVOKE ALL ON image_dat FROM PUBLIC;
+GRANT ALL ON image_dat TO PUBLIC;
+
+CREATE INDEX image_dat_image_id_idx ON image_dat(image_id);
+CREATE INDEX image_dat_image_size_idx ON image_dat(image_size);
+CREATE INDEX image_dat_content_type_idx ON image_dat(content_type);
+CREATE INDEX image_dat_original_width_idx ON image_dat(original_width);
+CREATE INDEX image_dat_original_height_idx ON image_dat(original_height);
+
+----thumbnail_dat作成
+
+CREATE SEQUENCE thumbnail_dat_id_seq start 1 increment 1 maxvalue 2147483647 minvalue 1  cache 1 ;
+REVOKE ALL ON thumbnail_dat_id_seq FROM PUBLIC;
+GRANT ALL ON thumbnail_dat_id_seq TO PUBLIC;
+
+CREATE TABLE thumbnail_dat(
+	id int4 NOT NULL DEFAULT nextval('"thumbnail_dat_id_seq"'::text) PRIMARY KEY,
+	registration_date timestamp NOT NULL DEFAULT now(),
+	image_id int4 NOT NULL,
+	thumbnail_size varchar(16) NOT NULL,
+	content_type varchar(64) NOT NULL,
+	original_name text NOT NULL,
+	original_width int4,
+	original_height int4,
+	width int4,
+	height int4,
+	file_name text,
+	file_size int4,
+	delete_flg boolean NOT NULL DEFAULT 'false'
+);
+REVOKE ALL ON thumbnail_dat FROM PUBLIC;
+GRANT ALL ON thumbnail_dat TO PUBLIC;
+
+CREATE INDEX thumbnail_dat_image_id_idx ON thumbnail_dat(image_id);
+CREATE INDEX thumbnail_dat_thumbnail_size_idx ON thumbnail_dat(thumbnail_size);
+CREATE INDEX thumbnail_dat_content_type_idx ON thumbnail_dat(content_type);
+CREATE INDEX thumbnail_dat_original_width_idx ON thumbnail_dat(original_width);
+CREATE INDEX thumbnail_dat_original_height_idx ON thumbnail_dat(original_height);
+
+----dialect_mst作成
+
+CREATE SEQUENCE dialect_mst_id_seq start 1 increment 1 maxvalue 2147483647 minvalue 1  cache 1 ;
+REVOKE ALL ON dialect_mst_id_seq FROM PUBLIC;
+GRANT ALL ON dialect_mst_id_seq TO PUBLIC;
+
+CREATE TABLE dialect_mst(
+	id int4 NOT NULL DEFAULT nextval('"dialect_mst_id_seq"'::text) PRIMARY KEY,
+	registration_date timestamp NOT NULL DEFAULT now(),
+	name varchar(64) NOT NULL,
+	view_name varchar(32) NOT NULL,
+	title text NOT NULL,
+	is_complex boolean NOT NULL DEFAULT 'false',
+	is_deletable boolean NOT NULL DEFAULT 'true',
+	delete_flg boolean NOT NULL DEFAULT 'false'
+);
+REVOKE ALL ON dialect_mst FROM PUBLIC;
+GRANT ALL ON dialect_mst TO PUBLIC;
+
+CREATE INDEX dialect_mst_name_idx ON dialect_mst(name);
+CREATE INDEX dialect_mst_view_name_idx ON dialect_mst(view_name);
+
+----dialect_dat作成
+
+CREATE SEQUENCE dialect_dat_id_seq start 1 increment 1 maxvalue 2147483647 minvalue 1  cache 1 ;
+REVOKE ALL ON dialect_dat_id_seq FROM PUBLIC;
+GRANT ALL ON dialect_dat_id_seq TO PUBLIC;
+
+CREATE TABLE dialect_dat(
+	id int4 NOT NULL DEFAULT nextval('"dialect_dat_id_seq"'::text) PRIMARY KEY,
+	registration_date timestamp NOT NULL DEFAULT now(),
+	dialect_name varchar(64) NOT NULL,
+	os varchar(64) NOT NULL DEFAULT 'COMMON',
+	carrier varchar(64) NOT NULL DEFAULT 'COMMON',
+	wysiwyg_data text,
+	master_data text,
+	account_id int4 NOT NULL,
+	delete_flg boolean NOT NULL DEFAULT 'false'
+);
+REVOKE ALL ON dialect_dat FROM PUBLIC;
+GRANT ALL ON dialect_dat TO PUBLIC;
+
+CREATE INDEX dialect_dat_dialect_name_idx ON dialect_dat(dialect_name);
+CREATE INDEX dialect_dat_os_idx ON dialect_dat(os);
+CREATE INDEX dialect_dat_carrier_idx ON dialect_dat(carrier);
+CREATE INDEX dialect_dat_account_id_idx ON dialect_dat(account_id);
+

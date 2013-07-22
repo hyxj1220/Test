@@ -1,0 +1,332 @@
+
+■ qmail インストール
+======================================================================
+● インストール準備
+----------------------------------------------------------------------
+cd /usr/local/src
+
+mkdir /var/qmail
+
+/usr/sbin/groupadd nofiles
+/usr/sbin/groupadd qmail
+/usr/sbin/useradd -g nofiles -d /var/qmail/alias -s /bin/true alias
+
+/usr/sbin/useradd -g nofiles -d /var/qmail -s /bin/true qmaild
+/usr/sbin/useradd -g nofiles -d /var/qmail -s /bin/true qmaill
+/usr/sbin/useradd -g nofiles -d /var/qmail -s /bin/true qmailp
+
+※ 以下が出力されるけど大丈夫
+----------------------------------------
+useradd: warning: the home directory already exists.
+Not copying any file from skel directory into it.
+----------------------------------------
+
+/usr/sbin/useradd -g qmail -d /var/qmail -s /bin/true qmailq
+/usr/sbin/useradd -g qmail -d /var/qmail -s /bin/true qmailr
+/usr/sbin/useradd -g qmail -d /var/qmail -s /bin/true qmails
+
+## check id qmaild, hostname ##
+----------------------------------------
+id qmaild
+hostname
+UIDQMAILD=`id -u qmaild`
+GIDQMAILD=`id -g qmaild`
+
+HOSTNAME=`hostname`
+
+echo ${UIDQMAILD} ${GIDQMAILD} ${HOSTNAME}
+504 503 XXXXXXXXXXXXXXXXXXXXXXXX
+----------------------------------------
+----------------------------------------------------------------------
+
+● qmail インストール
+----------------------------------------------------------------------
+cd /usr/local/src/
+
+wget http://sv171.ai-ms.co.jp/yamada/qmail-1.03.tar.gz
+
+wget http://sv171.ai-ms.co.jp/yamada/qmail-date-localtime.patch
+wget http://sv171.ai-ms.co.jp/yamada/qmail-1.03.errno.patch
+wget http://sv171.ai-ms.co.jp/yamada/qregex-20060423.patch
+
+tar xvzf qmail-1.03.tar.gz
+
+cd qmail-1.03
+
+patch -p1 < ../qmail-date-localtime.patch
+----------------------------------------
+patching file date822fmt.c
+----------------------------------------
+
+patch < ../qmail-1.03.errno.patch
+----------------------------------------
+patching file cdb_seek.c
+patching file dns.c
+patching file error.3
+patching file error.h
+----------------------------------------
+
+patch < ../qregex-20060423.patch
+----------------------------------------
+patching file install-big.c
+patching file Makefile
+patching file qmail-control.9
+patching file qmail-showctl.c
+patching file qmail-smtpd.8
+patching file qmail-smtpd.c
+Hunk #2 succeeded at 58 with fuzz 2.
+Hunk #7 succeeded at 309 with fuzz 2.
+patching file qregex.c
+patching file qregex.h
+patching file README.qregex
+patching file TARGETS
+----------------------------------------
+
+make setup check
+----------------------------------------
+./install
+./instcheck
+----------------------------------------
+
+hostname
+echo ${HOSTNAME}
+./config-fast ${HOSTNAME}
+----------------------------------------
+Your fully qualified host name is XXXXXXXXXXXXXXXX
+Putting XXXXXXXXXXXXXXXX into control/me...
+Putting sakura.ne.jp into control/defaultdomain...
+Putting ne.jp into control/plusdomain...
+Putting XXXXXXXXXXXXXXXX into control/locals...
+Putting XXXXXXXXXXXXXXXX into control/rcpthosts...
+Now qmail will refuse to accept SMTP messages except to XXXXXXXXXXXXXXXX
+Make sure to change rcpthosts if you add hosts to locals or virtualdomains!
+----------------------------------------
+
+echo '#' > /var/qmail/alias/.qmail-mailer-daemon
+echo '#' > /var/qmail/alias/.qmail-postmaster
+echo '#' > /var/qmail/alias/.qmail-root
+chmod 644 /var/qmail/alias/.qmail-*
+
+sed 's/\.\/Mailbox/\.\/Maildir\//g' /var/qmail/boot/home > /var/qmail/rc
+----------------------------------------------------------------------
+
+● sendmail 停止
+----------------------------------------------------------------------
+/etc/rc.d/init.d/sendmail status
+/etc/rc.d/init.d/sendmail stop
+
+mv /usr/sbin/sendmail /usr/sbin/sendmail.orig
+chmod 0 /usr/sbin/sendmail.orig
+ln -s /var/qmail/bin/sendmail /usr/sbin/sendmail
+
+/sbin/chkconfig sendmail --level 0123456 off
+
+/sbin/chkconfig sendmail --list
+----------------------------------------
+sendmail        0:off   1:off   2:off   3:off   4:off   5:off   6:off
+----------------------------------------
+----------------------------------------------------------------------
+
+● daemontools インストール
+----------------------------------------------------------------------
+cd /usr/local/src/
+
+wget http://sv171.ai-ms.co.jp/yamada/daemontools-0.76.tar.gz
+wget http://sv171.ai-ms.co.jp/yamada/daemontools-0.76.errno.patch
+
+tar zxvf daemontools-0.76.tar.gz
+
+cd admin/daemontools-0.76/src/
+patch < ../../../daemontools-0.76.errno.patch
+----------------------------------------
+patching file error.h
+----------------------------------------
+
+cd /usr/local/src/
+cd admin/daemontools-0.76
+
+package/compile
+
+echo '#!/bin/sh' > install.sh
+echo '' >> install.sh
+echo 'install_dir=/usr/local/bin' >> install.sh
+echo '' >> install.sh
+echo 'for file in command/*' >> install.sh
+echo 'do' >> install.sh
+echo '  if( file ${file} | grep -i '"'shell script'"' ) ; then' >> install.sh
+echo '    install -o root -g root -m 0755 ${file} ${install_dir}' >> install.sh
+echo '  else' >> install.sh
+echo '    install -o root -g root -m 0755 -s ${file} ${install_dir}' >> install.sh
+echo '  fi' >> install.sh
+echo 'done' >> install.sh
+
+chmod 755 install.sh
+
+./install.sh
+----------------------------------------
+command/svscanboot: Bourne shell script text executable
+----------------------------------------
+
+mkdir /var/service
+cd command/
+sed -e 's#/command:##g' -e 's#/command/#/usr/local/bin/#g' -e 's#/service#/var/service#g' svscanboot > /usr/local/bin/svscanboot
+cat /usr/local/bin/svscanboot
+
+
+## qmail
+----------------------------------------------------------------------
+mkdir /var/qmail/supervise
+mkdir /var/qmail/supervise/qmail
+cd /var/qmail/supervise/qmail/
+cp /var/qmail/rc /var/qmail/supervise/qmail/run
+chmod 755 /var/qmail/supervise/qmail/run
+ln -s /var/qmail/supervise/qmail /var/service/qmail
+----------------------------------------------------------------------
+
+id qmaild
+hostname
+UIDQMAILD=`id -u qmaild`
+GIDQMAILD=`id -g qmaild`
+HOSTNAME=`hostname`
+
+## pop3d
+----------------------------------------------------------------------
+cd /var/qmail/supervise/
+mkdir /var/qmail/supervise/pop3d
+cd /var/qmail/supervise/pop3d/
+echo '#!/bin/sh' > /var/qmail/supervise/pop3d/run
+echo '#                 -$$$$$$$$$$$$$$$$$$$- ' >> /var/qmail/supervise/pop3d/run
+echo '#                         -$$$$$$$$$$$$$$$$$$$- ' >> /var/qmail/supervise/pop3d/run
+echo '' >> /var/qmail/supervise/pop3d/run
+echo 'exec env - PATH="/var/qmail/bin:/sbin:/bin:/usr/sbin: \' >> /var/qmail/supervise/pop3d/run
+echo '/usr/bin:/usr/local/sbin:/usr/local/bin" \' >> /var/qmail/supervise/pop3d/run
+echo 'tcpserver -R -H -l '"${HOSTNAME}"' -v 0 pop3 \' >> /var/qmail/supervise/pop3d/run
+echo '/var/qmail/bin/qmail-popup '"${HOSTNAME}"' /home/vpopmail/bin/vchkpw \' >> /var/qmail/supervise/pop3d/run
+echo '/var/qmail/bin/qmail-pop3d Maildir 2>&1' >> /var/qmail/supervise/pop3d/run
+chmod 755 /var/qmail/supervise/pop3d/run
+ln -s /var/qmail/supervise/pop3d /var/service/pop3d
+----------------------------------------------------------------------
+
+## smtpd
+----------------------------------------------------------------------
+cd /var/qmail/supervise/
+mkdir /var/qmail/supervise/smtpd
+cd /var/qmail/supervise/smtpd/
+echo '#!/bin/sh' > /var/qmail/supervise/smtpd/run
+echo '#                 -$$$-        -$$$- ' >> /var/qmail/supervise/smtpd/run
+echo '' >> /var/qmail/supervise/smtpd/run
+echo 'exec env - PATH="/var/qmail/bin:/sbin:/bin:/usr/sbin: \' >> /var/qmail/supervise/smtpd/run
+echo '/usr/bin:/usr/local/sbin:/usr/local/bin" \' >> /var/qmail/supervise/smtpd/run
+echo 'tcpserver -R -H -u '"${UIDQMAILD}"' -c 60 -g '"${GIDQMAILD}"' -x /etc/tcp.smtp.cdb 0 smtp /var/qmail/bin/qmail-smtpd' >> /var/qmail/supervise/smtpd/run
+chmod 755 /var/qmail/supervise/smtpd/run
+ln -s /var/qmail/supervise/smtpd /var/service/smtpd
+----------------------------------------------------------------------
+
+cat /var/qmail/supervise/qmail/run
+cat /var/qmail/supervise/pop3d/run
+cat /var/qmail/supervise/smtpd/run
+
+ls -lAFR /var/qmail/supervise/
+
+
+## start at booting
+----------------------------------------------------------------------
+echo '' >> /etc/inittab
+echo '# run svscanboot script' >> /etc/inittab
+echo 'SV:123456:respawn:/usr/local/bin/svscanboot' >> /etc/inittab
+----------------------------------------------------------------------
+----------------------------------------------------------------------
+
+○ qmHandle インストール
+----------------------------------------------------------------------
+cd /usr/local/src/
+
+wget http://sv171.ai-ms.co.jp/yamada/qmhandle-1.3.2.tar.gz
+
+tar xvzf qmhandle-1.3.2.tar.gz
+cd qmhandle-1.3.2
+
+vi qmHandle
+【:set number】
+----------------------------------------
+28 # For instance, this is if you have DJB's daemontools
+29 my ($stopqmail) = '/usr/local/bin/svc -d /service/qmail-deliver';
+30 my ($startqmail) = '/usr/local/bin/svc -u /service/qmail-deliver';
+
+↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
+
+28 # For instance, this is if you have DJB's daemontools
+29 my ($stopqmail) = '/usr/local/bin/svc -d /var/service/qmail';
+30 my ($startqmail) = '/usr/local/bin/svc -u /var/service/qmail';
+----------------------------------------
+
+install -o root -g qmail -m 0755 qmHandle /usr/local/bin
+----------------------------------------------------------------------
+
+● qmail 制御ファイルの追加
+----------------------------------------------------------------------
+cd /var/qmail/control/
+
+echo '16' > /var/qmail/control/concurrencyremote
+echo '0' > /var/qmail/control/queuelifetime
+echo '16' > /var/qmail/control/concurrencylocal
+----------------------------------------------------------------------
+
+● vpopmail インストール
+----------------------------------------------------------------------
+cd /usr/local/src/
+
+wget http://sv171.ai-ms.co.jp/yamada/vpopmail-5.4.33.tar.gz
+
+tar zxvf vpopmail-5.4.33.tar.gz
+
+/usr/sbin/groupadd -g 91 vchkpw
+/usr/sbin/useradd -u 91 -g vchkpw -c Vpopmail-Master -d /home/vpopmail -m -s /bin/bash vpopmail
+
+cd /usr/local/src/vpopmail-5.4.33
+
+./configure --enable-roaming-users --disable-clear-passwd --enable-tcpserver-file=/etc/tcp.smtp --enable-tcprules-prog=/usr/local/bin/tcprules --enable-relay-clear-minutes=5
+
+make
+----------------------------------------
+make[2]: Leaving directory `/usr/local/src/vpopmail-5.4.33'
+make[1]: Leaving directory `/usr/local/src/vpopmail-5.4.33'
+----------------------------------------
+
+make install-strip
+----------------------------------------
+****************************************************
+
+     If you plan to use the vpopmail usage daemon
+     run the following commands:
+
+   cd vusaged && ./configure && make
+
+     Then follow the INSTALL file to install
+
+****************************************************
+----------------------------------------
+----------------------------------------------------------------------
+
+○ qmail スタート
+----------------------------------------------------------------------
+kill -HUP 1
+
+svc -t /var/service/*
+svstat /var/service/*
+
+sleep 3
+
+cd /root/
+svstat /var/service/*
+
+echo 'To: server@ai-ms.co.jp' > /root/testmail.txt
+echo 'Return-Path: root@osmosis.jp' >> /root/testmail.txt
+echo 'Subject: testnow' >> /root/testmail.txt
+echo '' >> /root/testmail.txt
+echo 'Hi. This is test mail from '"${HOSTNAME}"' .' >> /root/testmail.txt
+date >> /root/testmail.txt
+/var/qmail/bin/qmail-inject < /root/testmail.txt
+----------------------------------------------------------------------
+=================================================================
+

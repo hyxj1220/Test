@@ -1,0 +1,217 @@
+
+■ Nagios 監視用 nrpe インストール
+======================================================================
+● インストール準備
+----------------------------------------------------------------------
+useradd nagios
+
+rpm -qa | grep ssl
+----------------------------------------
+openssl-0.9.8e-12.el5_5.7
+openssl-0.9.8e-12.el5_5.7
+----------------------------------------
+
+yum install openssl-devel
+
+rpm -qa | grep ssl
+----------------------------------------
+openssl-0.9.8e-12.el5_5.7
+openssl-0.9.8e-12.el5_5.7
+openssl-devel-0.9.8e-12.el5_5.7
+openssl-devel-0.9.8e-12.el5_5.7
+----------------------------------------
+
+chmod 777 /usr/local/src/
+----------------------------------------------------------------------
+
+● プラグインインストール
+----------------------------------------------------------------------
+cd /usr/local/src/
+
+wget http://sv171.ai-ms.co.jp/yamada/nagios-plugins-1.4.15.tar.gz
+
+tar zxvf nagios-plugins-1.4.15.tar.gz
+
+cd nagios-plugins-1.4.15/
+
+./configure
+----------------------------------------
+config.status: creating po/Makefile
+            --with-apt-get-command:
+              --with-ping6-command:
+               --with-ping-command: /bin/ping -n -U -w %d -c %d %s
+                       --with-ipv6: yes
+                      --with-mysql: no
+                    --with-openssl: yes
+                     --with-gnutls: no
+               --enable-extra-opts: no
+                       --with-perl: /usr/bin/perl
+             --enable-perl-modules: no
+                     --with-cgiurl: /nagios/cgi-bin
+               --with-trusted-path: /bin:/sbin:/usr/bin:/usr/sbin
+                   --enable-libtap: no
+----------------------------------------
+
+make all
+----------------------------------------
+make[2]: Leaving directory `/usr/local/src/nagios-plugins-1.4.15/plugins-root'
+Making all in po
+make[2]: Entering directory `/usr/local/src/nagios-plugins-1.4.15/po'
+make[2]: Nothing to be done for `all'.
+make[2]: Leaving directory `/usr/local/src/nagios-plugins-1.4.15/po'
+make[2]: Entering directory `/usr/local/src/nagios-plugins-1.4.15'
+make[2]: Nothing to be done for `all-am'.
+make[2]: Leaving directory `/usr/local/src/nagios-plugins-1.4.15'
+make[1]: Leaving directory `/usr/local/src/nagios-plugins-1.4.15'
+----------------------------------------
+
+make install
+----------------------------------------
+make[1]: Leaving directory `/usr/local/src/nagios-plugins-1.4.15/po'
+make[1]: Entering directory `/usr/local/src/nagios-plugins-1.4.15'
+make[2]: Entering directory `/usr/local/src/nagios-plugins-1.4.15'
+make[2]: Nothing to be done for `install-exec-am'.
+make[2]: Nothing to be done for `install-data-am'.
+make[2]: Leaving directory `/usr/local/src/nagios-plugins-1.4.15'
+make[1]: Leaving directory `/usr/local/src/nagios-plugins-1.4.15'
+----------------------------------------
+----------------------------------------------------------------------
+
+● nrpe インストール
+----------------------------------------------------------------------
+cd /usr/local/src/
+
+wget http://sv171.ai-ms.co.jp/yamada/nrpe-2.12.tar.gz
+
+tar zxvf nrpe-2.12.tar.gz
+cd nrpe-2.12
+
+./configure
+----------------------------------------
+*** Configuration summary for nrpe 2.12 03-10-2008 ***:
+
+ General Options:
+ -------------------------
+ NRPE port:    5666
+ NRPE user:    nagios
+ NRPE group:   nagios
+ Nagios user:  nagios
+ Nagios group: nagios
+----------------------------------------
+
+make all
+----------------------------------------
+*** Compile finished ***
+
+If the NRPE daemon and client compiled without any errors, you
+can continue with the installation or upgrade process.
+
+Read the PDF documentation (NRPE.pdf) for information on the next
+steps you should take to complete the installation or upgrade.
+----------------------------------------
+
+make install-plugin
+make install-daemon
+make install-daemon-config
+make install-xinetd
+----------------------------------------------------------------------
+
+● 設定
+----------------------------------------------------------------------
+vi /etc/xinetd.d/nrpe
+----------------------------------------
+# default: on
+# description: NRPE (Nagios Remote Plugin Executor)
+service nrpe
+{
+        flags           = REUSE
+        socket_type     = stream
+        port            = 5666
+        wait            = no
+        user            = nagios
+        group           = nagios
+        server          = /usr/local/nagios/bin/nrpe
+        server_args     = -c /usr/local/nagios/etc/nrpe.cfg --inetd
+        log_on_failure  += USERID
+        disable         = no
+        only_from       = 127.0.0.1 61.58.35.80 182.48.23.41
+}
+----------------------------------------
+
+vi /etc/services
+【Shift G】
+----------------------------------------
+# Local services
+nrpe            5666/tcp                        # Nagios Remote Plugin Executor
+----------------------------------------
+
+vi /usr/local/nagios/etc/nrpe.cfg
+【Shift G】
+----------------------------------------
+#command[check_load]=/usr/local/nagios/libexec/check_load -w 15,10,5 -c 30,25,20
+#command[check_hda1]=/usr/local/nagios/libexec/check_disk -w 20% -c 10% -p /dev/hda1
+
+## for check HDD and Load
+command[check_hda]=/usr/local/nagios/libexec/check_disk -w 20% -c 10% -p /
+command[check_load]=/usr/local/nagios/libexec/check_load -w 7,5,4 -c 8,6,5
+----------------------------------------
+
+cd /usr/local/src/nagios-plugins-1.4.15/
+
+cp contrib/check_mem.pl /usr/local/nagios/libexec/check_mem.pl
+chmod +x /usr/local/nagios/libexec/check_mem.pl
+
+vi /usr/local/nagios/libexec/check_mem.pl
+【:set number】
+----------------------------------------
+42行目をコメントアウト
+
+ # $command_line = `vmstat | tail -1 | awk '{print \$4,\$5}'`;
+
+その直下に下記コードを追加
+
+ $command_line = `free | head -3 | tail -1 | awk '{print \$3,\$4}'`;
+----------------------------------------
+
+vi /usr/local/nagios/etc/nrpe.cfg
+【Shift G】
+----------------------------------------
+## for check memory
+command[check_mem]=/usr/local/nagios/libexec/check_mem.pl -f -w 20 -c 10
+----------------------------------------
+
+こんな感じ
+----------------------------------------
+# The following examples use hardcoded command arguments...
+
+command[check_users]=/usr/local/nagios/libexec/check_users -w 5 -c 10
+# command[check_load]=/usr/local/nagios/libexec/check_load -w 15,10,5 -c 30,25,20
+# command[check_hda1]=/usr/local/nagios/libexec/check_disk -w 20% -c 10% -p /dev/hda1
+command[check_zombie_procs]=/usr/local/nagios/libexec/check_procs -w 5 -c 10 -s Z
+command[check_total_procs]=/usr/local/nagios/libexec/check_procs -w 150 -c 200
+
+## for check HDD and Load
+command[check_hda]=/usr/local/nagios/libexec/check_disk -w 20% -c 10% -p /
+command[check_load]=/usr/local/nagios/libexec/check_load -w 7,5,4 -c 8,6,5
+
+## for check memory
+command[check_mem]=/usr/local/nagios/libexec/check_mem.pl -f -w 20 -c 10
+----------------------------------------
+
+rpm -qa | grep xinetd
+
+yum install xinetd
+
+/etc/rc.d/init.d/xinetd start
+
+ps auxwwf | grep xinetd | grep -v grep
+----------------------------------------
+root     20456  0.0  0.1  21668   940 ?        Ss   19:09   0:00 xinetd -stayalive -pidfile /var/run/xinetd.pid
+----------------------------------------
+
+/usr/local/nagios/libexec/check_nrpe -H localhost
+----------------------------------------
+NRPE v2.12
+----------------------------------------
+----------------------------------------------------------------------
+======================================================================
